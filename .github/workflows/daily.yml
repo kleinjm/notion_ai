@@ -4,7 +4,16 @@ on:
   schedule:
     # 08:00 UTC daily. Cron in GitHub Actions is always UTC — adjust as needed.
     - cron: "0 8 * * *"
-  workflow_dispatch: {}  # allows manual runs from the Actions tab
+  workflow_dispatch:      # allows manual runs from the Actions tab
+    inputs:
+      test_page_id:
+        description: "Process only this single source page id (leave blank for all Today=true rows)"
+        required: false
+        default: ""
+      dry_run:
+        description: "Read-only: print what would happen without writing"
+        type: boolean
+        default: false
 
 jobs:
   copy-today:
@@ -22,5 +31,7 @@ jobs:
           TARGET_DB_ID: ${{ vars.TARGET_DB_ID }}
           TODAY_PROP: ${{ vars.TODAY_PROP }}
           TARGET_DATE_PROP: ${{ vars.TARGET_DATE_PROP }}
-          # TEST_PAGE_ID intentionally unset in CI so it processes all matching rows.
-          DRY_RUN: "false"
+          # Scheduled runs pass no inputs, so these default to empty/false and
+          # the script processes all Today=true rows.
+          TEST_PAGE_ID: ${{ inputs.test_page_id }}
+          DRY_RUN: ${{ inputs.dry_run }}
