@@ -1,0 +1,26 @@
+name: Copy Today rows
+
+on:
+  schedule:
+    # 08:00 UTC daily. Cron in GitHub Actions is always UTC — adjust as needed.
+    - cron: "0 8 * * *"
+  workflow_dispatch: {}  # allows manual runs from the Actions tab
+
+jobs:
+  copy-today:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt
+      - run: python copy_today.py
+        env:
+          NOTION_PAT: ${{ secrets.NOTION_PAT }}
+          SOURCE_DB_ID: ${{ vars.SOURCE_DB_ID }}
+          TARGET_DB_ID: ${{ vars.TARGET_DB_ID }}
+          TODAY_PROP: ${{ vars.TODAY_PROP }}
+          TARGET_DATE_PROP: ${{ vars.TARGET_DATE_PROP }}
+          # TEST_PAGE_ID intentionally unset in CI so it processes all matching rows.
+          DRY_RUN: "false"
