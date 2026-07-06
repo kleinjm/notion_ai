@@ -1,6 +1,18 @@
 # notion_ai
 
+[![CI](https://github.com/kleinjm/notion_ai/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/kleinjm/notion_ai/actions/workflows/ci.yml)
+
 Personal automation for my Notion workspace.
+
+## Development
+
+```bash
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+pytest -q          # run the unit tests
+```
+
+CI (`.github/workflows/ci.yml`) runs the test suite on every push to `main`.
 
 ## `copy_today.py`
 
