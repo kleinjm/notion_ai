@@ -6,7 +6,8 @@ Runs locally (reads .env) and in GitHub Actions (reads real env vars).
 
 import os
 import sys
-from datetime import date
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from dotenv import load_dotenv
 from notion_client import Client
@@ -99,7 +100,10 @@ def main():
                 relation_prop = name
                 break
 
-    today_iso = date.today().isoformat()
+    # Stamp with the date in the configured timezone (default Pacific), not the
+    # runner's UTC clock — GitHub Actions runners are always UTC.
+    tz = ZoneInfo(os.environ.get("TIMEZONE", "America/Los_Angeles"))
+    today_iso = datetime.now(tz).date().isoformat()
     print(f"Mode: {'DRY RUN' if DRY_RUN else 'LIVE'} | date stamp: {today_iso}")
     print(f"Target date property: {date_prop!r}")
     print(f"Target relation to source: {relation_prop or '(none)'}")

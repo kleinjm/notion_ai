@@ -2,8 +2,9 @@ name: Copy Today rows
 
 on:
   schedule:
-    # 08:00 UTC daily. Cron in GitHub Actions is always UTC — adjust as needed.
-    - cron: "0 8 * * *"
+    # GitHub Actions cron is always UTC and does not observe DST.
+    # 14:00 UTC ≈ 7am PDT / 6am PST — early morning Pacific year-round.
+    - cron: "0 14 * * *"
   workflow_dispatch:      # allows manual runs from the Actions tab
     inputs:
       test_page_id:
@@ -31,6 +32,7 @@ jobs:
           TARGET_DB_ID: ${{ vars.TARGET_DB_ID }}
           TODAY_PROP: ${{ vars.TODAY_PROP }}
           TARGET_DATE_PROP: ${{ vars.TARGET_DATE_PROP }}
+          TIMEZONE: "America/Los_Angeles"
           # Scheduled runs pass no inputs, so these default to empty/false and
           # the script processes all Today=true rows.
           TEST_PAGE_ID: ${{ inputs.test_page_id }}
