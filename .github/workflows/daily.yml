@@ -3,8 +3,8 @@ name: Copy Today rows
 on:
   schedule:
     # GitHub Actions cron is always UTC and does not observe DST.
-    # 14:00 UTC ≈ 7am PDT / 6am PST — early morning Pacific year-round.
-    - cron: "0 14 * * *"
+    # 09:00 UTC = 2am PDT / 1am PST — targets 2am Pacific.
+    - cron: "0 9 * * *"
   workflow_dispatch:      # allows manual runs from the Actions tab
     inputs:
       test_page_id:
