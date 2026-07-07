@@ -67,7 +67,7 @@ def find_prop_by_type(schema_props, wanted_type):
 
 
 def main():
-    require("NOTION_TOKEN", TOKEN)
+    require("NOTION_PAT", TOKEN)
     require("SOURCE_DB_ID", SOURCE_DB_ID)
     require("TARGET_DB_ID", TARGET_DB_ID)
 
@@ -103,7 +103,17 @@ def main():
     # Stamp with the date in the configured timezone (default Pacific), not the
     # runner's UTC clock — GitHub Actions runners are always UTC.
     tz = ZoneInfo(os.environ.get("TIMEZONE", "America/Los_Angeles"))
-    today_iso = datetime.now(tz).date().isoformat()
+    now = datetime.now(tz)
+
+    # DST pin: scheduled runs fire from two UTC cron entries (05:00 and 06:00)
+    # so exactly one lands at 22:00 Pacific year-round. RUN_ONLY_AT_HOUR (set
+    # only on scheduled runs) makes the off-by-one-hour run exit as a no-op.
+    only_hour = os.environ.get("RUN_ONLY_AT_HOUR", "").strip()
+    if only_hour and now.hour != int(only_hour):
+        print(f"Local time {now:%H:%M %Z}; only runs at hour {only_hour}. Skipping.")
+        return
+
+    today_iso = now.date().isoformat()
     print(f"Mode: {'DRY RUN' if DRY_RUN else 'LIVE'} | date stamp: {today_iso}")
     print(f"Target date property: {date_prop!r}")
     print(f"Target relation to source: {relation_prop or '(none)'}")

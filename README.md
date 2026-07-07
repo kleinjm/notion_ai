@@ -4,6 +4,11 @@
 
 Personal automation for my Notion workspace.
 
+> **Notion access:** Always use the `NOTION_PAT` in `.env` for Notion API calls
+> in this project. It is scoped to the personal workspace holding these
+> databases. The Claude MCP Notion connector is authenticated to a *different*
+> workspace (EscrowSafe) and cannot see these pages.
+
 ## Development
 
 ```bash
@@ -32,7 +37,7 @@ the source rows' `Today` checkbox back to `false`. Runs daily via GitHub Actions
    ```bash
    python3 -m venv .venv && source .venv/bin/activate
    pip install -r requirements.txt
-   cp .env.example .env   # then fill in NOTION_TOKEN
+   cp .env.example .env   # then fill in NOTION_PAT
    ```
 
 ### Test (single record, safe)
@@ -49,7 +54,7 @@ Remove/blank `TEST_PAGE_ID` in `.env` to process all matching rows.
 
 ### GitHub Actions
 
-- Repo **Secret**: `NOTION_TOKEN`
+- Repo **Secret**: `NOTION_PAT`
 - Repo **Variables**: `SOURCE_DB_ID`, `TARGET_DB_ID`, `TODAY_PROP`,
   `TARGET_DATE_PROP` (leave date prop blank to auto-detect).
 - Schedule is in `.github/workflows/daily.yml` (UTC). Trigger manually from the
