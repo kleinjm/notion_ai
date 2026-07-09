@@ -6,7 +6,7 @@ Runs locally (reads .env) and in GitHub Actions (reads real env vars).
 
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from dotenv import load_dotenv
@@ -102,18 +102,11 @@ def main():
 
     # Stamp with the date in the configured timezone (default Pacific), not the
     # runner's UTC clock — GitHub Actions runners are always UTC.
+    # The job runs at 2am Pacific and stamps the day that just ended (i.e.
+    # "yesterday" in the configured timezone), so the workout day gets the
+    # right date even though the copy happens in the small hours after it.
     tz = ZoneInfo(os.environ.get("TIMEZONE", "America/Los_Angeles"))
-    now = datetime.now(tz)
-
-    # DST pin: scheduled runs fire from two UTC cron entries (05:00 and 06:00)
-    # so exactly one lands at 22:00 Pacific year-round. RUN_ONLY_AT_HOUR (set
-    # only on scheduled runs) makes the off-by-one-hour run exit as a no-op.
-    only_hour = os.environ.get("RUN_ONLY_AT_HOUR", "").strip()
-    if only_hour and now.hour != int(only_hour):
-        print(f"Local time {now:%H:%M %Z}; only runs at hour {only_hour}. Skipping.")
-        return
-
-    today_iso = now.date().isoformat()
+    today_iso = (datetime.now(tz).date() - timedelta(days=1)).isoformat()
     print(f"Mode: {'DRY RUN' if DRY_RUN else 'LIVE'} | date stamp: {today_iso}")
     print(f"Target date property: {date_prop!r}")
     print(f"Target relation to source: {relation_prop or '(none)'}")

@@ -3,11 +3,13 @@ name: Copy Today rows
 on:
   schedule:
     # GitHub Actions cron is always UTC and does not observe DST, so we fire at
-    # both offsets and let RUN_ONLY_AT_HOUR (below) no-op the wrong one:
-    #   05:00 UTC = 10pm PDT (summer),  06:00 UTC = 10pm PST (winter).
-    # Result: exactly one run at 10pm Pacific year-round.
-    - cron: "0 5 * * *"
-    - cron: "0 6 * * *"
+    # both offsets to hit 2am Pacific year-round:
+    #   09:00 UTC = 2am PDT (summer),  10:00 UTC = 2am PST (winter).
+    # Both fire, but the off-season one is a harmless no-op: the first run
+    # flips every Today=true row back to false, so the second finds nothing.
+    # The script stamps the prior day's date, so a 2am run logs the day before.
+    - cron: "0 9 * * *"
+    - cron: "0 10 * * *"
   workflow_dispatch:      # allows manual runs from the Actions tab
     inputs:
       test_page_id:
@@ -36,9 +38,6 @@ jobs:
           TODAY_PROP: ${{ vars.TODAY_PROP }}
           TARGET_DATE_PROP: ${{ vars.TARGET_DATE_PROP }}
           TIMEZONE: "America/Los_Angeles"
-          # Only enforced on scheduled runs, so the off-by-one-hour cron
-          # no-ops. Manual dispatch leaves it blank and always runs.
-          RUN_ONLY_AT_HOUR: ${{ github.event_name == 'schedule' && '22' || '' }}
           # Scheduled runs pass no inputs, so these default to empty/false and
           # the script processes all Today=true rows.
           TEST_PAGE_ID: ${{ inputs.test_page_id }}
